@@ -4,7 +4,19 @@ import string
 from django.db import models
 from django.conf import settings
 # Create your models here.
+
+class CursoQuerySet(models.QuerySet):
+
+    def is_teacher(self, user):
+        return self.filter(teacher=user)
+
+    def is_student(self, user):
+        return self.filter(inscripciones__student=user)
+
 class Curso(models.Model):
+
+    objects = CursoQuerySet.as_manager()
+
     class Status(models.TextChoices):
         ACTIVE = 'active', 'Active'
         INACTIVE = 'inactive', 'Inactive'
@@ -44,3 +56,49 @@ class Curso(models.Model):
 
     def __str__(self):
         return self.name
+
+class Inscripcion(models.Model):
+
+    class Status(models.TextChoices):
+        ACTIVE = 'active', 'Active'
+        DEACTIVATED = 'deactivated', 'Deactivated'
+
+    course = models.ForeignKey(
+        Curso,
+        on_delete=models.CASCADE,
+        related_name='inscripciones',
+    )
+
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='inscripciones',
+    )
+
+    status = models.CharField(
+        max_length=12,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+    )
+
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'inscripcion'
+        verbose_name = 'inscripcion'
+        verbose_name_plural = 'inscripciones'
+        ordering = ['-joined_at']
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=['course', 'student'],
+                name='unique_inscripcion',
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.student.username} - {self.course.name}"
+
+
+
+
