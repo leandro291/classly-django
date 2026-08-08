@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #created
     'users',
+    'cursos',
 
     #installed
     'rest_framework',
