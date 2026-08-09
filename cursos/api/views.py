@@ -2,8 +2,8 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 
-from cursos.api.permissions import IsTeacher, IsCourseTeacher
-from cursos.api.serializers import CursoSerializer
+from cursos.api.permissions import IsTeacher, IsCourseTeacher, IsStudent
+from cursos.api.serializers import CursoSerializer, UnirseCursoSerializer
 from cursos.models import Curso
 
 class CursoListCreateView(generics.ListCreateAPIView):
@@ -21,7 +21,6 @@ class CursoListCreateView(generics.ListCreateAPIView):
 
 class CursoRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, IsCourseTeacher]
-
     serializer_class = CursoSerializer
 
     def get_queryset(self):
@@ -29,3 +28,7 @@ class CursoRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
             return Curso.objects.is_teacher(self.request.user)
 
         return Curso.objects.is_student(self.request.user)
+
+class UnirseCursoView(generics.CreateAPIView):
+    serializer_class = UnirseCursoSerializer
+    permission_classes = [IsAuthenticated, IsStudent]
