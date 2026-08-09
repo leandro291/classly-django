@@ -9,6 +9,13 @@ class IsTeacher(permissions.BasePermission):
 
         return request.user.is_authenticated and request.user.rol == get_user_model().Roles.TEACHER
 
+class IsStudent(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return request.user.is_authenticated and request.user.rol == get_user_model().Roles.STUDENT
+
 class IsCourseTeacher(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
