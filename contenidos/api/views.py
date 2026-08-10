@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -7,79 +8,63 @@ from contenidos.api.permissions import IsMaterialTeacher
 from contenidos.api.serializers import MaterialSerializer
 from contenidos.models import Material
 from cursos.api.permissions import IsTeacher
-from cursos.models import Curso, Inscripcion
+from cursos.models import Curso
 
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
-@extend_schema(
-    tags=['Course'],
-    request={
-        'multipart/form-data': {
-            'type': 'object',
-            'properties': {
-                'title': {'type': 'string'},
-                'description': {'type': 'string'},
-                'archivos': {
-                    'type': 'array',
-                    'items': {'type': 'string', 'format': 'binary'}
-                }
-            }
-        }
-    }
+@extend_schema(tags=['Material'])
+@extend_schema_view(
+    get=extend_schema(
+        summary='Lista los materiales de un curso',
+        description='Devuelve los materiales del curso indicado según el rol: '
+                    'teacher (cursos que dicta) o student (cursos donde está inscrito).',
+    ),
+    post=extend_schema(
+        summary='Registra un material con sus archivos',
+        description='Crea un material y sus archivos. Solo el teacher propietario del curso.',
+    ),
 )
 class MaterialListCreateView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacher]
     serializer_class = MaterialSerializer
     parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
         course_pk = self.kwargs['course_pk']
-        usuario = self.request.user
+        user = self.request.user
 
-        if usuario.rol == 'teacher':
-            try:
-                curso = Curso.objects.get(id=course_pk, teacher=usuario)
-            except Curso.DoesNotExist:
-                curso = None
-        else:
-            try:
-                curso = Inscripcion.objects.get(
-                    course=course_pk,
-                    student=usuario,
-                ).course
-            except Inscripcion.DoesNotExist:
-                curso = None
+        if user.rol == get_user_model().Roles.TEACHER:
+            return Material.objects.is_teacher(user).filter(course_id=course_pk)
 
-        if curso is None:
-            return Material.objects.none()
-
-        return Material.objects.filter(course=curso)
+        return Material.objects.is_student(user).filter(course_id=course_pk)
 
     def perform_create(self, serializer):
-        course_pk = self.kwargs['course_pk']
         course = get_object_or_404(
             Curso,
-            id=course_pk,
+            id=self.kwargs['course_pk'],
             teacher=self.request.user,
         )
         serializer.save(course=course)
 
-@extend_schema(
-    methods=['PUT', 'PATCH'],
-    tags=['material'],
-    request={
-        'multipart/form-data': {
-            'type': 'object',
-            'properties': {
-                'title': {'type': 'string'},
-                'description': {'type': 'string'},
-                'archivos': {
-                    'type': 'array',
-                    'items': {'type': 'string', 'format': 'binary'}
-                }
-            }
-        }
-    }
+@extend_schema(tags=['Material'])
+@extend_schema_view(
+    get=extend_schema(
+        summary='Obtiene un material por su ID',
+        description='Detalle de un material. Accesible para el teacher propietario del curso '
+                    'o los estudiantes inscritos en él.',
+    ),
+    put=extend_schema(
+        summary='Actualiza un material',
+        description='Reemplaza un material y sus archivos. Solo el teacher propietario del curso.',
+    ),
+    patch=extend_schema(
+        summary='Actualiza parcialmente un material',
+        description='Actualiza campos específicos de un material. Solo el teacher propietario del curso.',
+    ),
+    delete=extend_schema(
+        summary='Elimina un material',
+        description='Borra un material y sus archivos. Solo el teacher propietario del curso.',
+    ),
 )
 class MaterialRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = MaterialSerializer
@@ -89,9 +74,7 @@ class MaterialRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        if user.rol == 'teacher':
+        if user.rol == get_user_model().Roles.TEACHER:
             return Material.objects.is_teacher(user)
 
         return Material.objects.is_student(user)
-
-
