@@ -1,13 +1,21 @@
 from rest_framework import serializers
 from cursos.models import Curso, Inscripcion
+from django.contrib.auth import get_user_model
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ['id', 'first_name', 'last_name', 'email']
 
 class CursoSerializer(serializers.ModelSerializer):
+    teacher = UserSerializer(read_only=True, many=True, source='cursos')
+
     class Meta:
         model = Curso
         fields = ['id', 'name', 'description', 'period', 'teacher', 'registration_code',
                   'status', 'created_at', 'updated_at']
 
-        read_only_fields = ['id', 'created_at', 'updated_at', 'teacher', 'registration_code',
+        read_only_fields = ['id', 'created_at', 'updated_at', 'registration_code',
                             'status']
 
 class UnirseCursoSerializer(serializers.ModelSerializer):
