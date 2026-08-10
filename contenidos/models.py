@@ -2,8 +2,18 @@ from django.db import models
 from cursos.models import Curso
 from cloudinary.models import CloudinaryField
 
+class MaterialQuerySet(models.QuerySet):
+    def is_teacher(self, user):
+        return self.filter(course__teacher=user)
+
+    def is_student(self, user):
+        return self.filter(course__inscripciones__student=user)
+
 # Create your models here.
 class Material(models.Model):
+
+    objects = MaterialQuerySet.as_manager()
+
     course = models.ForeignKey(
         Curso,
         on_delete=models.CASCADE,
