@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('file', cloudinary.models.CloudinaryField(max_length=255, verbose_name='file')),
                 ('uploaded_at', models.DateTimeField(auto_now_add=True)),
-                ('material', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='archivo_materials', to='contenido.material')),
+                ('material', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='archivo_materials', to='contenidos.material')),
             ],
             options={
                 'verbose_name': 'archivo_material',
