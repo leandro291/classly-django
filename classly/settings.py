@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     #created
     'users',
     'cursos',
-    'contenido',
+    'contenidos',
+    'tareas',
 
     #installed
     'cloudinary',
