@@ -19,7 +19,7 @@ class CursoListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(teacher=self.request.user)
 
-class CursoRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+class CursoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, IsCourseTeacher]
     serializer_class = CursoSerializer
 
