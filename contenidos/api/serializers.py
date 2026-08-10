@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from contenido.models import Material, ArchivoMaterial
+from contenidos.models import Material, ArchivoMaterial
 from drf_spectacular.utils import extend_schema_field
 
 @extend_schema_field({
@@ -42,3 +42,17 @@ class MaterialSerializer(serializers.ModelSerializer):
             )
 
         return material
+
+    def update(self, instance, validated_data):
+        archivos = validated_data.pop('archivos', [])
+        instance = super().update(instance, validated_data)
+
+        if archivos:
+            instance.archivo_materials.all().delete()
+            for archivo in archivos:
+                ArchivoMaterial.objects.create(
+                    material=instance,
+                    file=archivo
+                )
+
+        return instance
