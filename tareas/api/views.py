@@ -6,10 +6,11 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 
 from cursos.models import Curso
-from cursos.api.permissions import IsTeacher
+from cursos.api.permissions import IsTeacher, IsStudent
 from tareas.api.permissions import IsTareaTeacher
-from tareas.api.serializers import TareaCreateSerializer, TareaSerializer
-from tareas.models import Tarea
+from tareas.api.serializers import TareaCreateSerializer, TareaSerializer, EntregaSerializer, EntregaCreateSerializer
+from tareas.models import Tarea, Entrega
+
 
 @extend_schema(tags=['Workhome'])
 @extend_schema_view(
@@ -82,5 +83,45 @@ class TareaRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
             return Tarea.objects.is_teacher(user).filter(course_id=course_pk)
 
         return Tarea.objects.is_student(user).filter(course_id=course_pk)
+
+
+@extend_schema(tags=['Submission'])
+@extend_schema_view(
+    get=extend_schema(
+        summary='Lista las entregas de una tarea',
+        description='Entregas de la tarea. Teacher: todas. Student: solo las suyas.',
+    ),
+    post=extend_schema(
+        summary='Envía una entrega',
+        description='El estudiante envía su entrega (comentario y archivos).',
+        request={'multipart/form-data': EntregaCreateSerializer},
+    ),
+)
+class EntregaCreateListView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated, IsStudent]
+    serializer_class = EntregaSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_queryset(self):
+        tarea_pk = self.kwargs['workhome_pk']
+        user = self.request.user
+        if user.rol == get_user_model().Roles.TEACHER:
+            return Entrega.objects.is_teacher(user).filter(assignment_id=tarea_pk)
+
+        return Entrega.objects.filter(assignment_id=tarea_pk, student=user)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        workhome_pk = self.kwargs['workhome_pk']
+
+        workhome = get_object_or_404(
+            Tarea,
+            id=workhome_pk,
+        )
+
+        serializer.save(
+            student=user,
+            assignment=workhome
+        )
 
 
