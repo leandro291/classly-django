@@ -5,7 +5,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 
 from contenidos.api.permissions import IsMaterialTeacher
-from contenidos.api.serializers import MaterialSerializer
+from contenidos.api.serializers import MaterialCreateSerializer, MaterialSerializer
 from contenidos.models import Material
 from cursos.api.permissions import IsTeacher
 from cursos.models import Curso
@@ -22,6 +22,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
     post=extend_schema(
         summary='Registra un material con sus archivos',
         description='Crea un material y sus archivos. Solo el teacher propietario del curso.',
+        request={'multipart/form-data': MaterialCreateSerializer},
     ),
 )
 class MaterialListCreateView(generics.ListCreateAPIView):
@@ -56,10 +57,12 @@ class MaterialListCreateView(generics.ListCreateAPIView):
     put=extend_schema(
         summary='Actualiza un material',
         description='Reemplaza un material y sus archivos. Solo el teacher propietario del curso.',
+        request={'multipart/form-data': MaterialCreateSerializer},
     ),
     patch=extend_schema(
         summary='Actualiza parcialmente un material',
         description='Actualiza campos específicos de un material. Solo el teacher propietario del curso.',
+        request={'multipart/form-data': MaterialCreateSerializer},
     ),
     delete=extend_schema(
         summary='Elimina un material',
