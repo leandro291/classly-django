@@ -2,7 +2,9 @@ from datetime import date
 
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from tareas.models import Tarea
+
+from tareas.models import Tarea, Entrega, ArchivoEntrega
+
 
 @extend_schema_field(
     {
@@ -53,6 +55,55 @@ class TareaSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('La fecha límite no puede ser anterior a hoy.')
         return value
 
+
+@extend_schema_field({
+    "type": "array",
+    "items": {
+        "type": "string",
+        "format": "binary"
+    }
+})
+class MultipleImageField(serializers.ListField):
+    child = serializers.FileField(allow_empty_file=False, use_url=False)
+
+class ArchivoEntregaSerializer(serializers.ModelSerializer):
+    file = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ArchivoEntrega
+        fields = ['id', 'file', 'created_at']
+
+    def get_file(self, obj):
+        return obj.file.url if obj.file else None
+
+class EntregaCreateSerializer(serializers.ModelSerializer):
+    file_upload = MultipleImageField(write_only=True, required=False)
+
+    class Meta:
+        model = Entrega
+        fields = ['student_comment', 'file_upload']
+
+class EntregaSerializer(serializers.ModelSerializer):
+    archivos = ArchivoEntregaSerializer(read_only=True, many=True)
+    file_upload = MultipleImageField(write_only=True, required=False)
+
+    class Meta:
+        model = Entrega
+        fields = ['id', 'assignment', 'student', 'submitted_at', 'student_comment', 'teacher_comment',
+                  'status', 'score', 'archivos', 'file_upload']
+        read_only_fields = ['id', 'assignment', 'student', 'submitted_at', 'status', 'score']
+
+    def create(self, validated_data):
+        file_upload = validated_data.pop('file_upload', [])
+        entrega = Entrega.objects.create(**validated_data)
+
+        for file in file_upload:
+            ArchivoEntrega.objects.create(
+                submission=entrega,
+                file=file,
+            )
+
+        return entrega
 
 
 
