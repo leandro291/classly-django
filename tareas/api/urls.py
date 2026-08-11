@@ -3,5 +3,6 @@ from tareas.api import views
 
 urlpatterns = [
     path('course/<int:course_pk>/tarea/', views.TareaCreateListView.as_view()),
-    path('course/<int:course_pk>/tarea/<int:pk>/', views.TareaRetrieveUpdateDestroyAPIView.as_view()),
+    path('tarea/<int:pk>/', views.TareaRetrieveUpdateDestroyAPIView.as_view()),
+    path('course/<int:course_pk>/tarea/<int:workhome_pk>/entrega/', views.EntregaCreateListView.as_view()),
 ]
