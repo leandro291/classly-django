@@ -1,0 +1,6 @@
+from django.urls import path
+from tareas.api import views
+
+urlpatterns = [
+    path('course/<int:course_pk>/tarea/', views.TareaCreateListView.as_view()),
+]
