@@ -1,10 +1,21 @@
 from cloudinary.models import CloudinaryField
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.conf import settings
 from cursos.models import Curso
 
+class TareaQuerySet(models.QuerySet):
+
+    def is_teacher(self, user):
+        return self.filter(course__teacher=user)
+
+    def is_student(self, user):
+        return self.filter(course__inscripciones__student=user)
 
 class Tarea(models.Model):
+
+    objects = TareaQuerySet.as_manager()
+
     course = models.ForeignKey(
         Curso,
         on_delete=models.CASCADE,
@@ -13,9 +24,15 @@ class Tarea(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     file = CloudinaryField('file', folder='tareas', blank=True, null=True)
+    max_score = models.IntegerField(
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(20)
+        ],
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     due_date = models.DateField()
-    max_score = models.IntegerField()
+
 
     class Meta:
         db_table = 'tarea'
@@ -25,7 +42,6 @@ class Tarea(models.Model):
 
     def __str__(self):
         return self.title
-
 
 class Entrega(models.Model):
     class Status(models.TextChoices):
@@ -66,7 +82,6 @@ class Entrega(models.Model):
 
     def __str__(self):
         return f"Entrega de {self.student.username} para {self.assignment.title}"
-
 
 class ArchivoEntrega(models.Model):
     submission = models.ForeignKey(
