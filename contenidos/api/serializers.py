@@ -12,6 +12,13 @@ from drf_spectacular.utils import extend_schema_field
 class MultipleImageField(serializers.ListField):
     child = serializers.FileField(allow_empty_file=False, use_url=False)
 
+class MaterialCreateSerializer(serializers.ModelSerializer):
+    archivos = MultipleImageField(write_only=True, required=False)
+
+    class Meta:
+        model = Material
+        fields = ['title', 'description', 'archivos']
+
 class MaterialArchivoSerializer(serializers.ModelSerializer):
     file = serializers.SerializerMethodField()
 
