@@ -33,7 +33,6 @@ class Tarea(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     due_date = models.DateField()
 
-
     class Meta:
         db_table = 'tarea'
         verbose_name = 'tarea'
@@ -42,6 +41,14 @@ class Tarea(models.Model):
 
     def __str__(self):
         return self.title
+
+class EntregaQuerySet(models.QuerySet):
+
+    def is_teacher(self, user):
+        return self.filter(assignment__course__teacher=user)
+
+    def is_student(self, user):
+        return self.filter(assignment__course__inscripciones__student=user)
 
 class Entrega(models.Model):
     class Status(models.TextChoices):
