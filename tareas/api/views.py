@@ -6,7 +6,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 
 from cursos.models import Curso
-from cursos.api.permissions import IsCourseTeacher, IsTeacher
+from cursos.api.permissions import IsTeacher
+from tareas.api.permissions import IsTareaTeacher
 from tareas.api.serializers import TareaCreateSerializer, TareaSerializer
 from tareas.models import Tarea
 
@@ -24,9 +25,9 @@ from tareas.models import Tarea
     ),
 )
 class TareaCreateListView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated, IsCourseTeacher, IsTeacher]
+    permission_classes = [IsAuthenticated, IsTeacher]
     serializer_class = TareaSerializer
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
         course_pk = self.kwargs['course_pk']
@@ -45,5 +46,41 @@ class TareaCreateListView(generics.ListCreateAPIView):
             teacher = self.request.user,
         )
         serializer.save(course=course)
+
+@extend_schema(tags=['Workhome'])
+@extend_schema_view(
+    get=extend_schema(
+        summary='Obtiene una tarea por su ID',
+        description='Detalle de una tarea. Accesible para el teacher propietario del curso '
+                    'o los estudiantes inscritos en él.',
+    ),
+    put=extend_schema(
+        summary='Actualiza una tarea',
+        description='Reemplaza una tarea y su archivo. Solo el teacher propietario del curso.',
+        request={'multipart/form-data': TareaCreateSerializer},
+    ),
+    patch=extend_schema(
+        summary='Actualiza parcialmente una tarea',
+        description='Actualiza campos específicos de una tarea. Solo el teacher propietario del curso.',
+        request={'multipart/form-data': TareaCreateSerializer},
+    ),
+    delete=extend_schema(
+        summary='Elimina una tarea',
+        description='Borra una tarea. Solo el teacher propietario del curso.',
+    ),
+)
+class TareaRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsTareaTeacher, IsTeacher]
+    serializer_class = TareaSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_queryset(self):
+        course_pk = self.kwargs['course_pk']
+        user = self.request.user
+
+        if user.rol == get_user_model().Roles.TEACHER:
+            return Tarea.objects.is_teacher(user).filter(course_id=course_pk)
+
+        return Tarea.objects.is_student(user).filter(course_id=course_pk)
 
 
