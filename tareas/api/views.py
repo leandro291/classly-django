@@ -7,8 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 
 from cursos.models import Curso
 from cursos.api.permissions import IsTeacher, IsStudent
-from tareas.api.permissions import IsTareaTeacher
-from tareas.api.serializers import TareaCreateSerializer, TareaSerializer, EntregaSerializer, EntregaCreateSerializer
+from tareas.api.permissions import IsTareaTeacher, IsSubmitOwner
+from tareas.api.serializers import TareaCreateSerializer, TareaSerializer, EntregaSerializer, EntregaCreateSerializer, \
+    CalificarEntregaSerializer
 from tareas.models import Tarea, Entrega
 
 
@@ -76,13 +77,12 @@ class TareaRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
-        course_pk = self.kwargs['course_pk']
         user = self.request.user
 
         if user.rol == get_user_model().Roles.TEACHER:
-            return Tarea.objects.is_teacher(user).filter(course_id=course_pk)
+            return Tarea.objects.is_teacher(user)
 
-        return Tarea.objects.is_student(user).filter(course_id=course_pk)
+        return Tarea.objects.is_student(user)
 
 
 @extend_schema(tags=['Submission'])
@@ -123,5 +123,56 @@ class EntregaCreateListView(generics.ListCreateAPIView):
             student=user,
             assignment=workhome
         )
+
+@extend_schema(tags=['Submission'])
+@extend_schema_view(
+    get=extend_schema(
+        summary='Obtiene una entrega por su ID',
+        description='Detalle de una entrega. Teacher: cualquier entrega de sus cursos. '
+                    'Student: solo las suyas.',
+        responses=EntregaSerializer,
+    ),
+    put=extend_schema(
+        summary='Actualiza una entrega',
+        description='Teacher: califica con puntaje y comentario. Student (dueño de la entrega): '
+                    'edita su comentario y archivos.',
+        request=CalificarEntregaSerializer,
+        responses=EntregaSerializer,
+    ),
+    patch=extend_schema(
+        summary='Actualiza parcialmente una entrega',
+        description='Teacher: actualiza puntaje y/o comentario. Student (dueño): edita su '
+                    'comentario y archivos.',
+        request=CalificarEntregaSerializer,
+        responses=EntregaSerializer,
+    ),
+    delete=extend_schema(
+        summary='Elimina una entrega',
+        description='El estudiante dueño puede borrar su entrega; el teacher puede borrar '
+                    'cualquier entrega de sus cursos.',
+    ),
+)
+class EntregaRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsSubmitOwner]
+
+    def get_serializer_class(self):
+        user = self.request.user
+
+        if user.rol == get_user_model().Roles.TEACHER:
+            if self.request.method in ['PUT', 'PATCH']:
+                return CalificarEntregaSerializer
+
+            return EntregaSerializer
+
+        return EntregaSerializer
+
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.rol == get_user_model().Roles.TEACHER:
+            return Entrega.objects.is_teacher(user)
+
+        return Entrega.objects.filter(student=user)
+
 
 
