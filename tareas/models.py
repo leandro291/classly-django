@@ -2,7 +2,8 @@ from cloudinary.models import CloudinaryField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.conf import settings
-from cursos.models import Curso
+from cursos.models import Curso, Inscripcion
+
 
 class TareaQuerySet(models.QuerySet):
 
@@ -10,7 +11,10 @@ class TareaQuerySet(models.QuerySet):
         return self.filter(course__teacher=user)
 
     def is_student(self, user):
-        return self.filter(course__inscripciones__student=user)
+        return self.filter(
+            course__inscripciones__student=user,
+            course__inscripciones__status=Inscripcion.Status.ACTIVE,
+        )
 
 class Tarea(models.Model):
 
@@ -48,7 +52,8 @@ class EntregaQuerySet(models.QuerySet):
         return self.filter(assignment__course__teacher=user)
 
     def is_student(self, user):
-        return self.filter(assignment__course__inscripciones__student=user)
+        return self.filter(assignment__course__inscripciones__student=user,
+                           assignment__course__inscripciones__status=Inscripcion.Status.ACTIVE)
 
 class Entrega(models.Model):
     class Status(models.TextChoices):
