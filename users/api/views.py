@@ -1,9 +1,7 @@
 from rest_framework import generics
-from rest_framework_simplejwt.views import TokenObtainPairView
-
 from drf_spectacular.utils import extend_schema
-
 from users.api.serializers import UserRegisterSerializer, UserLoginSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 @extend_schema(
     tags=['Auth'],
@@ -20,4 +18,13 @@ class UserRegisterView(generics.CreateAPIView):
 )
 class UserLoginView(TokenObtainPairView):
     serializer_class = UserLoginSerializer
+
+
+@extend_schema(
+    tags=['Auth'],
+    summary='Renueva el access token',
+    description='Usa el refresh token para obtener un nuevo access token.',
+)
+class UserRefreshView(TokenRefreshView):
+    pass
 
