@@ -70,8 +70,8 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Classroom simulacion',
-    'DESCRIPTION': 'Your project description',
+    'TITLE': 'Classly API',
+    'DESCRIPTION': 'API de aulas virtuales: cursos, materiales, tareas y entregas con autenticación JWT.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
