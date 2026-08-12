@@ -6,3 +6,10 @@ class IsTareaTeacher(permissions.BasePermission):
             return True
 
         return obj.course.teacher == request.user
+
+class IsSubmitOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return obj.student == request.user or obj.assignment.course.teacher == request.user
