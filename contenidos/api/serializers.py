@@ -51,15 +51,15 @@ class MaterialSerializer(serializers.ModelSerializer):
         return material
 
     def update(self, instance, validated_data):
-        archivos = validated_data.pop('archivos', [])
-        instance = super().update(instance, validated_data)
+        archivos = validated_data.pop('archivos', None)
+        material = super().update(instance, validated_data)
 
-        if archivos:
+        if material and archivos is not None:
             instance.archivo_materials.all().delete()
             for archivo in archivos:
                 ArchivoMaterial.objects.create(
-                    material=instance,
+                    material=material,
                     file=archivo
                 )
 
-        return instance
+        return material
