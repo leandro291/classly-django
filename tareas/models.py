@@ -73,7 +73,14 @@ class Entrega(models.Model):
         choices=Status.choices,
         default=Status.A_TIEMPO,
     )
-    score = models.IntegerField(null=True, blank=True)
+    score = models.IntegerField(
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(20)
+        ],
+        null=True,
+        blank=True
+    )
 
     class Meta:
         db_table = 'entrega'
