@@ -1,5 +1,6 @@
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import generics
+
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 
@@ -62,6 +63,10 @@ class CursoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             return Curso.objects.is_teacher(self.request.user)
 
         return Curso.objects.is_student(self.request.user)
+
+    def perform_destroy(self, instance):
+        instance.status = Curso.Status.INACTIVE
+        instance.save()
 
 @extend_schema(tags=['Course'])
 @extend_schema_view(
