@@ -1,31 +1,9 @@
-from datetime import timezone
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
-class SoftDeleteManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(deleted_at__isnull=True)
 
-class SoftDeleteModel(models.Model):
-    deleted_at = models.DateTimeField(blank=True, null=True)
-
-    objects = SoftDeleteManager()
-    all_objects = models.Manager()
-
-    class Meta:
-        abstract = True
-
-    def soft_delete(self):
-        self.deleted_at = timezone.now()
-        self.save()
-
-    def restore(self):
-        self.deleted_at = None
-        self.save()
-
-class User(AbstractUser, SoftDeleteModel):
+class User(AbstractUser):
 
     class Roles(models.TextChoices):
         TEACHER = 'teacher', 'teacher'
