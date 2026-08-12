@@ -1,5 +1,5 @@
 from django.db import models
-from cursos.models import Curso
+from cursos.models import Curso, Inscripcion
 from cloudinary.models import CloudinaryField
 
 class MaterialQuerySet(models.QuerySet):
@@ -7,8 +7,9 @@ class MaterialQuerySet(models.QuerySet):
         return self.filter(course__teacher=user)
 
     def is_student(self, user):
-        return self.filter(course__inscripciones__student=user)
-
+        return self.filter(course__inscripciones__student=user,
+                           course__inscripciones__status=Inscripcion.Status.ACTIVE
+                           )
 # Create your models here.
 class Material(models.Model):
 
