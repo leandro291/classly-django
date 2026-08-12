@@ -5,7 +5,6 @@ from rest_framework import serializers
 
 from tareas.models import Tarea, Entrega, ArchivoEntrega
 
-
 @extend_schema_field(
     {
         'type': 'string',
@@ -39,7 +38,7 @@ class TareaSerializer(serializers.ModelSerializer):
         tarea = Tarea.objects.create(**validated_data)
         if archivo:
             tarea.file = archivo
-            tarea.save(update_fields=['file'])
+            tarea.save()
         return tarea
 
     def update(self, instance, validated_data):
@@ -47,7 +46,7 @@ class TareaSerializer(serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
         if archivo:
             instance.file = archivo
-            instance.save(update_fields=['file'])
+            instance.save()
         return instance
 
     def validate_due_date(self, value):
@@ -94,7 +93,13 @@ class EntregaSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'assignment', 'student', 'submitted_at', 'status', 'score', 'teacher_comment']
 
     def create(self, validated_data):
+        assignment = validated_data.get('assignment', None)
+        student = validated_data.get('student', None)
         file_upload = validated_data.pop('file_upload', [])
+
+        if Entrega.objects.filter(assignment=assignment, student=student).exists():
+            raise serializers.ValidationError('Ya realizaste una entrega para esta tarea.')
+
         entrega = Entrega.objects.create(**validated_data)
 
         for file in file_upload:
