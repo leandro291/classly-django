@@ -51,7 +51,7 @@ class UnirseCursoSerializer(serializers.ModelSerializer):
         if not creada:
             if inscripcion.status == Inscripcion.Status.DEACTIVATED:
                 inscripcion.status = Inscripcion.Status.ACTIVE
-                inscripcion.save(update_fields=['status'])
+                inscripcion.save()
             else:
                 raise serializers.ValidationError('Ya estas inscrito en este curso.')
 
