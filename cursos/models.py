@@ -3,6 +3,10 @@ import string
 
 from django.db import models
 from django.conf import settings
+
+from users.models import SoftDeleteModel
+
+
 # Create your models here.
 
 class CursoQuerySet(models.QuerySet):
@@ -13,7 +17,7 @@ class CursoQuerySet(models.QuerySet):
     def is_student(self, user):
         return self.filter(inscripciones__student=user)
 
-class Curso(models.Model):
+class Curso(SoftDeleteModel):
 
     objects = CursoQuerySet.as_manager()
 
