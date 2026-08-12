@@ -4,8 +4,6 @@ import string
 from django.db import models
 from django.conf import settings
 
-from users.models import SoftDeleteModel
-
 
 # Create your models here.
 
@@ -15,9 +13,12 @@ class CursoQuerySet(models.QuerySet):
         return self.filter(teacher=user)
 
     def is_student(self, user):
-        return self.filter(inscripciones__student=user)
+        return self.filter(
+            inscripciones__student=user,
+            inscripciones__status=Inscripcion.Status.ACTIVE,
+        )
 
-class Curso(SoftDeleteModel):
+class Curso(models.Model):
 
     objects = CursoQuerySet.as_manager()
 
