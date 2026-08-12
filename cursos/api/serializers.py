@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'first_name', 'last_name', 'email']
 
 class CursoSerializer(serializers.ModelSerializer):
-    teacher = UserSerializer(read_only=True, many=True, source='cursos')
+    teacher = UserSerializer(read_only=True)
 
     class Meta:
         model = Curso
