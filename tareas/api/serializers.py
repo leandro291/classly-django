@@ -91,7 +91,7 @@ class EntregaSerializer(serializers.ModelSerializer):
         model = Entrega
         fields = ['id', 'assignment', 'student', 'submitted_at', 'student_comment', 'teacher_comment',
                   'status', 'score', 'archivos', 'file_upload']
-        read_only_fields = ['id', 'assignment', 'student', 'submitted_at', 'status', 'score']
+        read_only_fields = ['id', 'assignment', 'student', 'submitted_at', 'status', 'score', 'teacher_comment']
 
     def create(self, validated_data):
         file_upload = validated_data.pop('file_upload', [])
@@ -104,6 +104,31 @@ class EntregaSerializer(serializers.ModelSerializer):
             )
 
         return entrega
+
+    def update(self, instance, validated_data):
+        file_upload = validated_data.pop('file_upload', None)
+        entrega = super().update(instance, validated_data)
+
+        if entrega and file_upload is not None:
+            instance.archivos.all().delete()
+            for file in file_upload:
+                ArchivoEntrega.objects.create(
+                    submission=entrega,
+                    file=file,
+                )
+
+        return entrega
+
+class CalificarEntregaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Entrega
+        fields = ['score', 'teacher_comment']
+
+    def validate_score(self, value):
+        if value < 0 or value > 20:
+            raise serializers.ValidationError(f"La calificación debe estar entre 0 y 20.")
+
+        return value
 
 
 
