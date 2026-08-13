@@ -7,6 +7,7 @@ click==8.4.2
 cloudinary==1.45.0
 Django==6.1
 django-cloudinary-storage==0.3.0
+django-cors-headers==4.9.0
 django-jazzmin==3.0.5
 django-stubs==6.0.9
 django-stubs-ext==6.0.9
