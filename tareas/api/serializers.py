@@ -3,6 +3,7 @@ from datetime import date
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from users.models import User
 from tareas.models import Tarea, Entrega, ArchivoEntrega
 
 @extend_schema_field(
@@ -82,9 +83,15 @@ class EntregaCreateSerializer(serializers.ModelSerializer):
         model = Entrega
         fields = ['student_comment', 'file_upload']
 
+class EntregaStudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name']
+
 class EntregaSerializer(serializers.ModelSerializer):
     archivos = ArchivoEntregaSerializer(read_only=True, many=True)
     file_upload = MultipleImageField(write_only=True, required=False)
+    student = EntregaStudentSerializer(read_only=True)
 
     class Meta:
         model = Entrega
