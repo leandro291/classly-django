@@ -56,6 +56,8 @@ class EntregaQuerySet(models.QuerySet):
                            assignment__course__inscripciones__status=Inscripcion.Status.ACTIVE)
 
 class Entrega(models.Model):
+    objects = EntregaQuerySet.as_manager()
+
     class Status(models.TextChoices):
         A_TIEMPO = 'a_tiempo', 'A tiempo'
         TARDIA = 'tardia', 'Tardía'
