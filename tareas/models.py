@@ -27,7 +27,7 @@ class Tarea(models.Model):
     )
     title = models.CharField(max_length=255)
     description = models.TextField()
-    file = CloudinaryField('file', folder='tareas', blank=True, null=True)
+    file = CloudinaryField('file', folder='tareas', blank=True, null=True, resource_type='auto')
     max_score = models.IntegerField(
         validators=[
             MinValueValidator(0),
