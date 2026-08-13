@@ -42,7 +42,7 @@ class ArchivoMaterial(models.Model):
         related_name='archivo_materials',
     )
 
-    file = CloudinaryField('file', folder='materials')
+    file = CloudinaryField('file', folder='materials', resource_type='auto')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

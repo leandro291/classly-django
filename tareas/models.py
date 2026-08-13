@@ -108,7 +108,7 @@ class ArchivoEntrega(models.Model):
         on_delete=models.CASCADE,
         related_name='archivos',
     )
-    file = CloudinaryField('file', folder='entregas')
+    file = CloudinaryField('file', folder='entregas', resource_type='auto')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
