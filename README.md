@@ -1,6 +1,23 @@
-# Classly
+<h1 align="center">Classly · API</h1>
+<p align="center">API REST de aulas virtuales — clases, materiales, tareas y calificaciones</p>
 
-API REST de aulas virtuales. Los profesores crean cursos, publican materiales y asignan tareas; los estudiantes se inscriben mediante un código único, acceden al contenido y entregan sus tareas para ser calificadas.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white" alt="Django">
+  <img src="https://img.shields.io/badge/DRF-A30000?style=for-the-badge&logo=django&logoColor=white" alt="DRF">
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT">
+  <img src="https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white" alt="Cloudinary">
+</p>
+
+<p align="center">
+  <a href="https://classly-react.vercel.app"><img src="https://img.shields.io/badge/Ver_demo-2F81F7?style=for-the-badge&logo=vercel&logoColor=white" alt="Ver demo"></a>
+  <a href="https://github.com/leandro291/classly-react"><img src="https://img.shields.io/badge/Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="Frontend"></a>
+</p>
+
+<p align="center">
+  <img src="ModeladoDB.png" alt="Modelo de base de datos" width="800">
+</p>
 
 ## Características
 
